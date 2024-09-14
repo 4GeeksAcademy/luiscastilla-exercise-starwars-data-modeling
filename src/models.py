@@ -7,26 +7,56 @@ from eralchemy2 import render_er
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
+class Usuario(Base):
+    __tablename__ = 'usuario'
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    username = Column(String(20), nullable=False, unique=True)
+    firstname = Column(String(20), nullable=False)
+    lastname = Column(String(250), nullable=False)
+    email = Column(String(20), nullable=False, unique=True)
+    password = Column(String(50), nullable=False)
+    SuscriptionDate = Column(String(50), nullable=False)
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
+    favoritos = relationship('Favoritos', back_populates='usuario') 
+
+class Favoritos(Base):
+    __tablename__ = 'favoritos'
     id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+    personaje_id = Column(Integer, ForeignKey('personajes.id'))
+    planetas_id = Column(Integer, ForeignKey('planetas.id'))
+    usuario_id = Column(Integer, ForeignKey('usuario.id'))
+    vehiculos_id = Column(Integer, ForeignKey('vehiculos.id'))
 
-    def to_dict(self):
-        return {}
+    usuario = relationship('Usuario', back_populates='favoritos')  
+    personajes = relationship('Personajes', back_populates='favoritos')
+    planetas = relationship('Planetas', back_populates='favoritos')
+    vehiculos = relationship('Vehiculos', back_populates='favoritos')
 
-## Draw from SQLAlchemy base
-render_er(Base, 'diagram.png')
+
+class Personajes(Base):
+    __tablename__ = 'personajes'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(30), nullable=False)
+
+    favoritos = relationship('Favoritos', back_populates='personajes')
+
+class Planetas(Base):
+    __tablename__ = 'planetas'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(30), nullable=False)
+
+    favoritos = relationship('Favoritos', back_populates='planetas')
+
+class Vehiculos(Base):
+    __tablename__ = 'vehiculos'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(30), nullable=False)
+
+    favoritos = relationship('Favoritos', back_populates='vehiculos')
+   
+try:
+    result = render_er(Base, 'diagram.png')
+    print("Success! Check the diagram.png file")
+except Exception as e:
+    print("There was a problem generating the diagram")
+    raise e
